@@ -11,6 +11,11 @@ describe('map', function() {
         assert.deepEqual(R.map(times2, [1, 2, 3, 4]), [2, 4, 6, 8]);
     });
 
+    it('dispatches to objects that implement `map`', function() {
+        var obj = {x: 100, map: function(f) { return f(this.x); }};
+        assert.strictEqual(R.map(add1, obj), 101);
+    });
+
     it('is automatically curried', function() {
         var inc = R.map(add1);
         assert.deepEqual(inc([1, 2, 3]), [2, 3, 4]);
