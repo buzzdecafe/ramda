@@ -7,6 +7,8 @@
 
     'use strict';
 
+    var _Map = _Map;
+
     var __ = void 0;
 
     var _add = function _add(a, b) {
@@ -289,6 +291,8 @@
             return list;
         }
     };
+
+    var _symTransformer = typeof Symbol !== 'undefined' ? Symbol('transformer') : '@@transformer';
 
     var always = function always(val) {
         return function () {
@@ -791,6 +795,10 @@
         return obj != null && !_isArray(obj) && typeof obj[methodName] === 'function';
     };
 
+    var _isTransformer = function _isTransformer(obj) {
+        return obj[_symTransformer] !== void 0 || typeof obj.step === 'function' && typeof obj.result === 'function';
+    };
+
     var _keyValue = function _keyValue(fn, list) {
         return _map(function (item) {
             return {
@@ -1153,8 +1161,6 @@
         return lns;
     });
 
-    var map = _curry2(_checkForMethod('map', _map));
-
     var mapAccumL = _curry3(function mapAccumL(fn, acc, list) {
         var idx = -1, len = list.length, result = new Array(len), tuple = [acc];
         while (++idx < len) {
@@ -1511,6 +1517,27 @@
         }, [], fns);
     };
 
+    var _dispatchable = function _dispatchable(name, fn, X) {
+        return function (a, b, c) {
+            var length = arguments.length;
+            var obj = arguments[length - 1];
+            if (_isTransformer(obj)) {
+                return new X(arguments[0], obj);
+            }
+            var callBound = obj && !_isArray(obj) && typeof obj[name] === 'function';
+            switch (arguments.length) {
+            case 0:
+                return fn();
+            case 1:
+                return callBound ? obj[name]() : fn(a);
+            case 2:
+                return callBound ? obj[name](a) : fn(a, b);
+            case 3:
+                return callBound ? obj[name](a, b) : fn(a, b, c);
+            }
+        };
+    };
+
     var _extend = function _extend(destination, other) {
         var props = keys(other), idx = -1, length = props.length;
         while (++idx < length) {
@@ -1653,6 +1680,8 @@
             return _foldl(_ap, _map(lifted, arguments[0]), _slice(arguments, 1));
         });
     });
+
+    var map = _curry2(_dispatchable('map', _map, _Map));
 
     var mixin = _curry2(function mixin(a, b) {
         return _extend(_extend({}, a), b);
