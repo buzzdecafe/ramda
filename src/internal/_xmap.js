@@ -1,4 +1,7 @@
 module.exports = (function() {
+    function _xmap(f, xf) {
+        return new XMap(f, xf);
+    }
 
     function XMap(f, xf) {
         this.xf = xf;
@@ -17,5 +20,5 @@ module.exports = (function() {
         return this.xf.step(result, this.f(input));
     };
 
-    return XMap;
-}());
+    return _xmap;
+})();

@@ -21,8 +21,6 @@ describe('map', function() {
             step: function(acc, x) { return acc.concat(x); },
             result: function(x) { return x; }
         };
-        var xd = R.map(add1, obj);
-        assert(xd instanceof R.XMap);
         assert.deepEqual(R.map(add1, obj), {
             f: add1,
             xf: obj
