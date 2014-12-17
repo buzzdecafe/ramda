@@ -1,14 +1,11 @@
 var _isArray = require('./_isArray');
 var _isTransformer = require('./_isTransformer');
 
-module.exports = function _dispatchable(name, fn, xf) {
+module.exports = function _dispatchable(name, f, xf) {
     return function(a, b, c) {
         var length = arguments.length;
         var obj = arguments[length - 1];
-
-        if (_isTransformer(obj)) {
-            return xf.apply(null, arguments);
-        }
+        var fn = obj && _isTransformer(obj) ? xf : f;
         var callBound = obj && !_isArray(obj) && typeof obj[name] === 'function';
         switch (arguments.length) {
             case 0: return fn();
