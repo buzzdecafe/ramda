@@ -7,23 +7,6 @@
 
     'use strict';
 
-    var XMap = function () {
-        function XMap(f, xf) {
-            this.xf = xf;
-            this.f = f;
-        }
-        XMap.prototype.init = function () {
-            return this.xf.init();
-        };
-        XMap.prototype.result = function (result) {
-            return this.xf.result(result);
-        };
-        XMap.prototype.step = function (result, input) {
-            return this.xf.step(result, this.f(input));
-        };
-        return XMap;
-    }();
-
     var __ = void 0;
 
     var _add = function _add(a, b) {
@@ -308,6 +291,26 @@
     };
 
     var _symTransformer = typeof Symbol !== 'undefined' ? Symbol('transformer') : '@@transformer';
+
+    var _xmap = function () {
+        function _xmap(f, xf) {
+            return new XMap(f, xf);
+        }
+        function XMap(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XMap.prototype.init = function () {
+            return this.xf.init();
+        };
+        XMap.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XMap.prototype.step = function (result, input) {
+            return this.xf.step(result, this.f(input));
+        };
+        return _xmap;
+    }();
 
     var always = function always(val) {
         return function () {
@@ -1532,12 +1535,12 @@
         }, [], fns);
     };
 
-    var _dispatchable = function _dispatchable(name, fn, X) {
+    var _dispatchable = function _dispatchable(name, fn, xf) {
         return function (a, b, c) {
             var length = arguments.length;
             var obj = arguments[length - 1];
             if (_isTransformer(obj)) {
-                return new X(arguments[0], obj);
+                return xf.apply(null, arguments);
             }
             var callBound = obj && !_isArray(obj) && typeof obj[name] === 'function';
             switch (arguments.length) {
@@ -1696,7 +1699,7 @@
         });
     });
 
-    var map = _curry2(_dispatchable('map', _map, XMap));
+    var map = _curry2(_dispatchable('map', _map, _xmap));
 
     var mixin = _curry2(function mixin(a, b) {
         return _extend(_extend({}, a), b);
@@ -1820,7 +1823,6 @@
         F: F,
         I: I,
         T: T,
-        XMap: XMap,
         __: __,
         add: add,
         all: all,
