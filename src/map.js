@@ -1,7 +1,7 @@
+var XMap = require('./XMap');
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
 var _map = require('./internal/_map');
-var XMap = require('./internal/XMap');
 
 /**
  * Returns a new list, constructed by applying the supplied function to every element of the
