@@ -1,7 +1,7 @@
-var _xMap = require('./internal/_xMap');
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
 var _map = require('./internal/_map');
+var XMap = require('./internal/XMap');
 
 /**
  * Returns a new list, constructed by applying the supplied function to every element of the
@@ -26,4 +26,4 @@ var _map = require('./internal/_map');
  *
  *      R.map(double, [1, 2, 3]); //=> [2, 4, 6]
  */
-module.exports = _curry2(_dispatchable('map', _map, _xMap));
+module.exports = _curry2(_dispatchable('map', _map, XMap));
