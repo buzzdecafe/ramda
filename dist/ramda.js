@@ -871,7 +871,10 @@
         return copy;
     };
 
-    var _xwrap = function _xwrap(fn) {
+    var _xwrap = (function() {
+        function _xwrap(fn) {
+            return new XWrap(fn);
+        }
         function XWrap(fn) {
             this.f = fn;
         }
@@ -882,8 +885,8 @@
         XWrap.prototype.step = function (acc, x) {
             return this.f(acc, x);
         };
-        return new XWrap(fn);
-    }();
+        return _xwrap;
+    }());
 
     var add = _curry2(_add);
 
