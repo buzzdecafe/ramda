@@ -1,3 +1,5 @@
-module.exports = function(acc, x) {
-    return acc.concat(x);
+var _concat = require('./_concat');
+
+module.exports = function _appendTo(acc, x) {
+    return _concat(acc, [x]);
 };

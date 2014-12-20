@@ -24,7 +24,7 @@
     };
 
     var _appendTo = function (acc, x) {
-        return acc.concat(x);
+        return _concat(acc, [x]);
     };
 
     var _arrayReduce = function _arrayReduce(xf, acc, ls) {
