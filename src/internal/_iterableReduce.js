@@ -1,6 +1,8 @@
+var _symIterator = require('./_symIterator');
+
 module.exports = function _iterableReduce(xf, acc, iter) {
-    if (iter['@@iterator']) {
-        iter = iter['@@iterator']();
+    if (iter[_symIterator]) {
+        iter = iter[_symIterator]();
     }
     var step = iter.next();
     while (!step.done) {

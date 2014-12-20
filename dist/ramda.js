@@ -23,10 +23,6 @@
         return true;
     };
 
-    var _appendTo = function (acc, x) {
-        return _concat(acc, [x]);
-    };
-
     var _arrayReduce = function _arrayReduce(xf, acc, ls) {
         var i = -1, len = ls.length;
         while (++i < len) {
@@ -144,22 +140,6 @@
 
     var _isThenable = function _isThenable(value) {
         return value != null && value === Object(value) && typeof value.then === 'function';
-    };
-
-    var _iterableReduce = function _iterableReduce(xf, acc, iter) {
-        if (iter['@@iterator']) {
-            iter = iter['@@iterator']();
-        }
-        var step = iter.next();
-        while (!step.done) {
-            acc = xf.step(acc, step.value);
-            if (acc.__transducers_reduced__) {
-                acc = acc.value;
-                break;
-            }
-            step = iter.next();
-        }
-        return xf.result(acc);
     };
 
     var _lastIndexOf = function _lastIndexOf(list, item, from) {
@@ -281,6 +261,8 @@
             return list;
         }
     };
+
+    var _symIterator = typeof Symbol !== 'undefined' ? Symbol('iterator') : '@@iterator';
 
     var _symTransformer = typeof Symbol !== 'undefined' ? Symbol('transformer') : '@@transformer';
 
@@ -686,6 +668,10 @@
         return _concat(list, [el]);
     };
 
+    var _appendTo = function _appendTo(acc, x) {
+        return _concat(acc, [x]);
+    };
+
     var _appendXf = function _appendXf() {
         return {
             step: _appendTo,
@@ -837,6 +823,22 @@
         return obj[_symTransformer] !== void 0 || typeof obj.step === 'function' && typeof obj.result === 'function';
     };
 
+    var _iterableReduce = function _iterableReduce(xf, acc, iter) {
+        if (iter[_symIterator]) {
+            iter = iter[_symIterator]();
+        }
+        var step = iter.next();
+        while (!step.done) {
+            acc = xf.step(acc, step.value);
+            if (acc.__transducers_reduced__) {
+                acc = acc.value;
+                break;
+            }
+            step = iter.next();
+        }
+        return xf.result(acc);
+    };
+
     var _makeFlat = function _makeFlat(recursive) {
         return function flatt(list) {
             var value, result = [], idx = -1, j, ilen = list.length, jlen;
@@ -871,7 +873,7 @@
         return copy;
     };
 
-    var _xwrap = (function() {
+    var _xwrap = function () {
         function _xwrap(fn) {
             return new XWrap(fn);
         }
@@ -886,7 +888,7 @@
             return this.f(acc, x);
         };
         return _xwrap;
-    }());
+    }();
 
     var add = _curry2(_add);
 
@@ -1504,7 +1506,7 @@
 
     var _foldl = function _foldl(fn, acc, list) {
         var xf = _isTransformer(fn) ? fn : _xwrap(fn);
-        if (_isArray(list)) {
+        if (isArrayLike(list)) {
             return _arrayReduce(xf, acc, list);
         } else if (_isIterable(list)) {
             return _iterableReduce(xf, acc, list);
@@ -1905,7 +1907,7 @@
             throw _noArgsException();
         }
         return curryN(arity, function () {
-            return _foldl(_ap, _map(lifted, arguments[0]), _slice(arguments, 1));
+            return _foldl(ap, map(lifted, arguments[0]), _slice(arguments, 1));
         });
     });
 
