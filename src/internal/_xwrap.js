@@ -1,6 +1,10 @@
 var identity = require('./identity');
 
-module.exports = (function _xwrap(fn) {
+module.exports = (function() {
+    function _xwrap(fn) {
+        return new XWrap(fn);
+    }
+
     function XWrap(fn) {
         this.f = fn;
     }
@@ -12,5 +16,5 @@ module.exports = (function _xwrap(fn) {
         return this.f(acc, x);
     };
 
-    return new XWrap(fn);
+    return _xwrap;
 }());
