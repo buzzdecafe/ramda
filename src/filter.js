@@ -1,6 +1,7 @@
-var _checkForMethod = require('./internal/_checkForMethod');
 var _curry2 = require('./internal/_curry2');
+var _dispatchable = require('./internal/_dispatchable');
 var _filter = require('./internal/_filter');
+var _xfilter = require('./internal/_xfilter');
 
 
 /**
@@ -25,4 +26,4 @@ var _filter = require('./internal/_filter');
  *      };
  *      R.filter(isEven, [1, 2, 3, 4]); //=> [2, 4]
  */
-module.exports = _curry2(_checkForMethod('filter', _filter));
+module.exports = _curry2(_dispatchable('filter', _filter, _xfilter));

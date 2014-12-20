@@ -1,9 +1,7 @@
+var _appendXf = require('./_appendXf');
+var _xfilter = require('./_xfilter');
+var foldl = require('../foldl');
+
 module.exports = function _filter(fn, list) {
-    var idx = -1, len = list.length, result = [];
-    while (++idx < len) {
-        if (fn(list[idx])) {
-            result[result.length] = list[idx];
-        }
-    }
-    return result;
+    return foldl(_xfilter(fn, _appendXf()), [], list);
 };

@@ -1,7 +1,8 @@
-module.exports = function _map(fn, list) {
-    var idx = -1, len = list.length, result = new Array(len);
-    while (++idx < len) {
-        result[idx] = fn(list[idx]);
-    }
-    return result;
+var _appendXf = require('./_appendXf');
+var _xmap = require('./_xfilter');
+var foldl = require('../foldl');
+
+module.exports = function _filter(fn, list) {
+    return foldl(_xmap(fn, _appendXf()), [], list);
 };
+
