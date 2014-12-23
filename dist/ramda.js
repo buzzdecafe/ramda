@@ -855,6 +855,56 @@
         return _curry2(_xany);
     }();
 
+    var _xdrop = function () {
+        function _xdrop(n, xf) {
+            return new XDrop(n, xf);
+        }
+        function XDrop(n, xf) {
+            this.xf = xf;
+            this.n = n;
+        }
+        XDrop.prototype.init = function () {
+            return this.xf.init();
+        };
+        XDrop.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XDrop.prototype.step = function (result, input) {
+            if (this.n > 0) {
+                this.n--;
+                return result;
+            }
+            return this.xf.step(result, input);
+        };
+        return _curry2(_xdrop);
+    }();
+
+    var _xdropWhile = function () {
+        function _xdropWhile(f, xf) {
+            return new XDropWhile(f, xf);
+        }
+        function XDropWhile(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XDropWhile.prototype.init = function () {
+            return this.xf.init();
+        };
+        XDropWhile.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XDropWhile.prototype.step = function (result, input) {
+            if (this.f) {
+                if (this.f(input)) {
+                    return result;
+                }
+                this.f = null;
+            }
+            return this.xf.step(result, input);
+        };
+        return _curry2(_xdropWhile);
+    }();
+
     var _xfilter = function () {
         function _xfilter(f, xf) {
             return new XFilter(f, xf);
@@ -893,6 +943,57 @@
             return this.xf.step(result, this.f(input));
         };
         return _curry2(_xmap);
+    }();
+
+    var _xtake = function () {
+        function _xtake(n, xf) {
+            return new XTake(n, xf);
+        }
+        function XTake(n, xf) {
+            this.xf = xf;
+            this.n = n;
+        }
+        XTake.prototype.init = function () {
+            return this.xf.init();
+        };
+        XTake.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XTake.prototype.step = function (result, input) {
+            if (this.n-- > 0) {
+                result = this.xf.step(result, input);
+            }
+            if (this.n <= 0) {
+                result = _reduced(result);
+            }
+            return result;
+        };
+        return _curry2(_xtake);
+    }();
+
+    var _xtakeWhile = function () {
+        function _xtakeWhile(f, xf) {
+            return new XTakeWhile(f, xf);
+        }
+        function XTakeWhile(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XTakeWhile.prototype.init = function () {
+            return this.xf.init();
+        };
+        XTakeWhile.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XTakeWhile.prototype.step = function (result, input) {
+            if (this.f(input)) {
+                result = this.xf.step(result, input);
+            } else {
+                result = _reduced(result);
+            }
+            return result;
+        };
+        return _curry2(_xtakeWhile);
     }();
 
     var _xwrap = function () {
@@ -995,17 +1096,6 @@
             }
         }
         return out;
-    });
-
-    var drop = _curry2(_checkForMethod('drop', function drop(n, list) {
-        return n < list.length ? _slice(list, n) : [];
-    }));
-
-    var dropWhile = _curry2(function dropWhile(pred, list) {
-        var idx = -1, len = list.length;
-        while (++idx < len && pred(list[idx])) {
-        }
-        return _slice(list, idx);
     });
 
     var empty = function empty(x) {
@@ -1374,17 +1464,6 @@
     var tail = _checkForMethod('tail', function (list) {
         return _slice(list, 1);
     });
-
-    var take = _curry2(_checkForMethod('take', function (n, list) {
-        return _slice(list, 0, Math.min(n, list.length));
-    }));
-
-    var takeWhile = _curry2(_checkForMethod('takeWhile', function (fn, list) {
-        var idx = -1, len = list.length;
-        while (++idx < len && fn(list[idx])) {
-        }
-        return _slice(list, 0, idx);
-    }));
 
     var tap = _curry2(function tap(fn, x) {
         fn(x);
@@ -1896,6 +1975,10 @@
         };
     };
 
+    var drop = _curry2(_dispatchable('drop', _xdrop));
+
+    var dropWhile = _curry2(_dispatchable('dropWhile', _xdropWhile));
+
     var filter = _curry2(_dispatchable('filter', _xfilter));
 
     var functions = _functionsWith(keys);
@@ -1933,6 +2016,10 @@
         var funcs = _map(_xfConvert, _slice(arguments));
         return pipe.apply(this, funcs);
     };
+
+    var take = _curry2(_dispatchable('take', _xtake));
+
+    var takeWhile = _curry2(_dispatchable('takeWhile', _xtakeWhile));
 
     var toPairs = _pairWith(keys);
 
