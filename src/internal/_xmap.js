@@ -1,3 +1,5 @@
+var _curry2 = require('./_curry2');
+
 module.exports = (function() {
     function _xmap(f, xf) {
         return new XMap(f, xf);
@@ -20,5 +22,5 @@ module.exports = (function() {
         return this.xf.step(result, this.f(input));
     };
 
-    return _xmap;
+    return _curry2(_xmap);
 })();

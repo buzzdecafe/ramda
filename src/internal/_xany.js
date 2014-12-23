@@ -1,3 +1,4 @@
+var _curry2 = require('./_curry2');
 var _reduced = require('_reduced');
 
 module.exports = (function() {
@@ -22,5 +23,5 @@ module.exports = (function() {
         return this.f(input) ? _reduced(true) : false;
     };
 
-    return _xany;
+    return _curry2(_xany);
 })();

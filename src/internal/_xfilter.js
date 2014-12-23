@@ -1,3 +1,5 @@
+var _curry2 = require('./_curry2');
+
 module.exports = (function() {
     function _xfilter(f, xf) {
         return new XFilter(f, xf);
@@ -20,5 +22,5 @@ module.exports = (function() {
         return this.f(input) ? this.xf.step(result, input) : result;
     };
 
-    return _xfilter;
+    return _curry2(_xfilter);
 })();

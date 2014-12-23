@@ -1,6 +1,5 @@
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
-var _map = require('./internal/_map');
 var _xmap = require('./internal/_xmap');
 
 /**
@@ -26,4 +25,4 @@ var _xmap = require('./internal/_xmap');
  *
  *      R.map(double, [1, 2, 3]); //=> [2, 4, 6]
  */
-module.exports = _curry2(_dispatchable('map', _map, _xmap));
+module.exports = _curry2(_dispatchable('map', _xmap));

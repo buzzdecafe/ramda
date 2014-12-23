@@ -1,3 +1,5 @@
+var _symIterator = require('./_symIterator');
+
 module.exports = function _isIterable(x) {
-    return x['@@iterator'] || (x.next && typeof x.next === 'function');
+    return x[_symIterator] || (x.next && typeof x.next === 'function');
 };

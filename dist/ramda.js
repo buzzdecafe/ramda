@@ -7,6 +7,8 @@
 
     'use strict';
 
+    var _XF_FLAG_ = {};
+
     var __ = void 0;
 
     var _add = function _add(a, b) {
@@ -24,9 +26,9 @@
     };
 
     var _arrayReduce = function _arrayReduce(xf, acc, ls) {
-        var i = -1, len = ls.length;
-        while (++i < len) {
-            acc = xf.step(acc, ls[i]);
+        var idx = -1, len = ls.length;
+        while (++idx < len) {
+            acc = xf.step(acc, ls[idx]);
             if (acc.__transducers_reduced__) {
                 acc = acc.value;
                 break;
@@ -132,10 +134,6 @@
 
     var _isInteger = Number.isInteger || function _isInteger(n) {
         return n << 0 === n;
-    };
-
-    var _isIterable = function _isIterable(x) {
-        return x['@@iterator'] || x.next && typeof x.next === 'function';
     };
 
     var _isThenable = function _isThenable(value) {
@@ -266,65 +264,9 @@
 
     var _symTransformer = typeof Symbol !== 'undefined' ? Symbol('transformer') : '@@transformer';
 
-    var _xany = function () {
-        function _xany(f, xf) {
-            return new XAny(f, xf);
-        }
-        function XAny(f, xf) {
-            this.xf = xf;
-            this.f = f;
-        }
-        XAny.prototype.init = function () {
-            return this.xf.init();
-        };
-        XAny.prototype.result = function (result) {
-            return this.xf.result(result);
-        };
-        XAny.prototype.step = function (result, input) {
-            return this.f(input) ? _reduced(true) : false;
-        };
-        return _xany;
-    }();
-
-    var _xfilter = function () {
-        function _xfilter(f, xf) {
-            return new XFilter(f, xf);
-        }
-        function XFilter(f, xf) {
-            this.xf = xf;
-            this.f = f;
-        }
-        XFilter.prototype.init = function () {
-            return this.xf.init();
-        };
-        XFilter.prototype.result = function (result) {
-            return this.xf.result(result);
-        };
-        XFilter.prototype.step = function (result, input) {
-            return this.f(input) ? this.xf.step(result, input) : result;
-        };
-        return _xfilter;
-    }();
-
-    var _xmap = function () {
-        function _xmap(f, xf) {
-            return new XMap(f, xf);
-        }
-        function XMap(f, xf) {
-            this.xf = xf;
-            this.f = f;
-        }
-        XMap.prototype.init = function () {
-            return this.xf.init();
-        };
-        XMap.prototype.result = function (result) {
-            return this.xf.result(result);
-        };
-        XMap.prototype.step = function (result, input) {
-            return this.xf.step(result, this.f(input));
-        };
-        return _xmap;
-    }();
+    var _xfConvert = function xConvert(fn) {
+        return fn(_XF_FLAG_);
+    };
 
     var always = function always(val) {
         return function () {
@@ -672,13 +614,6 @@
         return _concat(acc, [x]);
     };
 
-    var _appendXf = function _appendXf() {
-        return {
-            step: _appendTo,
-            result: identity
-        };
-    };
-
     var _baseCopy = function _baseCopy(value, refFrom, refTo) {
         var copy = function copy(copiedValue) {
             var len = refFrom.length;
@@ -815,8 +750,35 @@
         };
     };
 
+    var _curry4 = function _curry4(fn) {
+        return function (a, b, c, d) {
+            switch (arguments.length) {
+            case 0:
+                throw _noArgsException();
+            case 1:
+                return _curry3(function (b, c, d) {
+                    return fn(a, b, c, d);
+                });
+            case 2:
+                return _curry2(function (c, d) {
+                    return fn(a, b, c, d);
+                });
+            case 3:
+                return function (d) {
+                    return fn(a, b, c, d);
+                };
+            default:
+                return fn(a, b, c, d);
+            }
+        };
+    };
+
     var _hasMethod = function _hasMethod(methodName, obj) {
         return obj != null && !_isArray(obj) && typeof obj[methodName] === 'function';
+    };
+
+    var _isIterable = function _isIterable(x) {
+        return x[_symIterator] || x.next && typeof x.next === 'function';
     };
 
     var _isTransformer = function _isTransformer(obj) {
@@ -872,6 +834,66 @@
         }
         return copy;
     };
+
+    var _xany = function () {
+        function _xany(f, xf) {
+            return new XAny(f, xf);
+        }
+        function XAny(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XAny.prototype.init = function () {
+            return this.xf.init();
+        };
+        XAny.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XAny.prototype.step = function (result, input) {
+            return this.f(input) ? _reduced(true) : false;
+        };
+        return _curry2(_xany);
+    }();
+
+    var _xfilter = function () {
+        function _xfilter(f, xf) {
+            return new XFilter(f, xf);
+        }
+        function XFilter(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XFilter.prototype.init = function () {
+            return this.xf.init();
+        };
+        XFilter.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XFilter.prototype.step = function (result, input) {
+            return this.f(input) ? this.xf.step(result, input) : result;
+        };
+        return _curry2(_xfilter);
+    }();
+
+    var _xmap = function () {
+        function _xmap(f, xf) {
+            return new XMap(f, xf);
+        }
+        function XMap(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XMap.prototype.init = function () {
+            return this.xf.init();
+        };
+        XMap.prototype.result = function (result) {
+            return this.xf.result(result);
+        };
+        XMap.prototype.step = function (result, input) {
+            return this.xf.step(result, this.f(input));
+        };
+        return _curry2(_xmap);
+    }();
 
     var _xwrap = function () {
         function _xwrap(fn) {
@@ -1477,25 +1499,6 @@
         return rv;
     });
 
-    var _dispatchable = function _dispatchable(name, f, xf) {
-        return function (a, b, c) {
-            var length = arguments.length;
-            var obj = arguments[length - 1];
-            var fn = obj && _isTransformer(obj) ? xf : f;
-            var callBound = obj && !_isArray(obj) && typeof obj[name] === 'function';
-            switch (arguments.length) {
-            case 0:
-                return fn();
-            case 1:
-                return callBound ? obj[name]() : fn(a);
-            case 2:
-                return callBound ? obj[name](a) : fn(a, b);
-            case 3:
-                return callBound ? obj[name](a, b) : fn(a, b, c);
-            }
-        };
-    };
-
     var _extend = function _extend(destination, other) {
         var props = keys(other), idx = -1, length = props.length;
         while (++idx < length) {
@@ -1505,11 +1508,13 @@
     };
 
     var _foldl = function _foldl(fn, acc, list) {
-        var xf = _isTransformer(fn) ? fn : _xwrap(fn);
+        if (typeof fn === 'function') {
+            fn = _xwrap(fn);
+        }
         if (isArrayLike(list)) {
-            return _arrayReduce(xf, acc, list);
+            return _arrayReduce(fn, acc, list);
         } else if (_isIterable(list)) {
-            return _iterableReduce(xf, acc, list);
+            return _iterableReduce(fn, acc, list);
         } else {
             throw new TypeError(typeof list + ' is not reducible');
         }
@@ -1524,14 +1529,6 @@
     };
 
     var foldl = _curry3(_foldl);
-
-    var groupBy = _curry2(_dispatchable('groupBy', function groupBy(fn, list) {
-        return _foldl(function (acc, elt) {
-            var key = fn(elt);
-            acc[key] = _append(elt, acc[key] || (acc[key] = []));
-            return acc;
-        }, {}, list);
-    }, _xmap));
 
     var head = nth(0);
 
@@ -1645,6 +1642,10 @@
 
     var sum = foldl(_add, 0);
 
+    var transduce = _curry4(function (xf, fn, acc, ls) {
+        return foldl(xf(fn), acc, ls);
+    });
+
     var union = _curry2(compose(uniq, _concat));
 
     var unionWith = _curry3(function unionWith(pred, list1, list2) {
@@ -1663,27 +1664,138 @@
         }));
     };
 
-    var where = function where(spec, testObj) {
-        var parsedSpec = groupBy(function (key) {
-            return typeof spec[key] === 'function' ? 'fn' : 'obj';
-        }, keys(spec));
-        switch (arguments.length) {
-        case 0:
-            throw _noArgsException();
-        case 1:
-            return function (testObj) {
-                return _satisfiesSpec(spec, parsedSpec, testObj);
-            };
-        }
-        return _satisfiesSpec(spec, parsedSpec, testObj);
-    };
-
     var _any = function _any(fn, list) {
         return foldl(_xany(fn, _boolXf()), false, list);
     };
 
+    var _appendXf = function () {
+        var _appendXfArray = {
+            init: function () {
+                return [];
+            },
+            step: _appendTo,
+            result: identity
+        };
+        var _appendXfString = {
+            init: function () {
+                return '';
+            },
+            step: _add,
+            result: identity
+        };
+        var _appendXfObject = {
+            init: function () {
+                return {};
+            },
+            step: mixin,
+            result: identity
+        };
+        function _appendXf(obj) {
+            if (_isTransformer(obj)) {
+                var xf = obj[_symTransformer] || obj;
+                return xf;
+            }
+            if (isArrayLike(obj)) {
+                return _appendXfArray;
+            }
+            if (typeof obj === 'string') {
+                return _appendXfString;
+            }
+            if (typeof obj === 'object') {
+                return _appendXfObject;
+            }
+            throw new Error('Cannot create transformer for ' + obj);
+        }
+        return _appendXf;
+    }();
+
+    var _transduceDispatch = _curry2(function _transduceDispatch(xf, obj) {
+        var appendXf = _appendXf(obj);
+        return transduce(xf, appendXf, appendXf.init(), obj);
+    });
+
+    var any = _curry2(_any);
+
+    var concat = op(function (set1, set2) {
+        if (_isArray(set2)) {
+            return _concat(set1, set2);
+        } else if (_hasMethod('concat', set1)) {
+            return set1.concat(set2);
+        } else {
+            throw new TypeError('can\'t concat ' + typeof set1);
+        }
+    });
+
+    var constructN = _curry2(function constructN(n, Fn) {
+        var f = function () {
+            var Temp = function () {
+                }, inst, ret;
+            Temp.prototype = Fn.prototype;
+            inst = new Temp();
+            ret = Fn.apply(inst, arguments);
+            return Object(ret) === ret ? ret : inst;
+        };
+        return n > 1 ? curry(nAry(n, f)) : f;
+    });
+
+    var contains = op(_contains);
+
+    var divide = op(function divide(a, b) {
+        return a / b;
+    });
+
+    var evolve = _curry2(function evolve(transformations, object) {
+        return _extend(_extend({}, object), mapObjIndexed(function (fn, key) {
+            return fn(object[key]);
+        }, transformations));
+    });
+
+    var gt = op(_gt);
+
+    var gte = op(function gte(a, b) {
+        return a >= b;
+    });
+
+    var lt = op(_lt);
+
+    var lte = op(function lte(a, b) {
+        return a <= b;
+    });
+
+    var mathMod = op(function mathMod(m, p) {
+        if (!_isInteger(m)) {
+            return NaN;
+        }
+        if (!_isInteger(p) || p < 1) {
+            return NaN;
+        }
+        return (m % p + p) % p;
+    });
+
+    var modulo = op(function modulo(a, b) {
+        return a % b;
+    });
+
+    var _dispatchable = function _dispatchable(name, xf, f) {
+        return function () {
+            var length = arguments.length;
+            var obj = arguments[length - 1];
+            var args = _slice(arguments, 0, length - 1);
+            if (obj === _XF_FLAG_) {
+                return xf.apply(null, args);
+            }
+            if (obj && !_isArray(obj) && typeof obj[name] === 'function') {
+                return obj[name].apply(obj, args);
+            }
+            if (typeof f === 'function') {
+                return f.apply(null, arguments);
+            }
+            return _transduceDispatch(xf.apply(null, args), obj);
+        };
+    };
+
     var _filter = function _filter(fn, list) {
-        return foldl(_xfilter(fn, _appendXf()), [], list);
+        return _transduceDispatch(_xfilter(fn), list);
     };
 
     var _functionsWith = function _functionsWith(fn) {
@@ -1695,7 +1807,7 @@
     };
 
     var _map = function _map(fn, list) {
-        return foldl(_xmap(fn, _appendXf()), [], list);
+        return _transduceDispatch(_xmap(fn), list);
     };
 
     var _pairWith = function _pairWith(fn) {
@@ -1726,8 +1838,6 @@
     };
 
     var allPass = _predicateWrap(_all);
-
-    var any = _curry2(_any);
 
     var anyPass = _predicateWrap(_any);
 
@@ -1772,29 +1882,9 @@
         return unnest(_map(f, list));
     }));
 
-    var concat = op(function (set1, set2) {
-        if (_isArray(set2)) {
-            return _concat(set1, set2);
-        } else if (_hasMethod('concat', set1)) {
-            return set1.concat(set2);
-        } else {
-            throw new TypeError('can\'t concat ' + typeof set1);
-        }
-    });
-
-    var constructN = _curry2(function constructN(n, Fn) {
-        var f = function () {
-            var Temp = function () {
-                }, inst, ret;
-            Temp.prototype = Fn.prototype;
-            inst = new Temp();
-            ret = Fn.apply(inst, arguments);
-            return Object(ret) === ret ? ret : inst;
-        };
-        return n > 1 ? curry(nAry(n, f)) : f;
-    });
-
-    var contains = op(_contains);
+    var construct = function construct(Fn) {
+        return constructN(Fn.length, Fn);
+    };
 
     var converge = function (after) {
         var fns = _slice(arguments, 1);
@@ -1806,53 +1896,25 @@
         };
     };
 
-    var divide = op(function divide(a, b) {
-        return a / b;
-    });
-
-    var evolve = _curry2(function evolve(transformations, object) {
-        return _extend(_extend({}, object), mapObjIndexed(function (fn, key) {
-            return fn(object[key]);
-        }, transformations));
-    });
-
-    var filter = _curry2(_dispatchable('filter', _filter, _xfilter));
+    var filter = _curry2(_dispatchable('filter', _xfilter));
 
     var functions = _functionsWith(keys);
 
     var functionsIn = _functionsWith(keysIn);
 
-    var gt = op(_gt);
-
-    var gte = op(function gte(a, b) {
-        return a >= b;
-    });
+    var groupBy = _curry2(_dispatchable('groupBy', null, function groupBy(fn, list) {
+        return _foldl(function (acc, elt) {
+            var key = fn(elt);
+            acc[key] = _append(elt, acc[key] || (acc[key] = []));
+            return acc;
+        }, {}, list);
+    }, _xmap));
 
     var intersection = _curry2(function intersection(list1, list2) {
         return uniq(_filter(flip(_contains)(list1), list2));
     });
 
-    var lt = op(_lt);
-
-    var lte = op(function lte(a, b) {
-        return a <= b;
-    });
-
-    var map = _curry2(_dispatchable('map', _map, _xmap));
-
-    var mathMod = op(function mathMod(m, p) {
-        if (!_isInteger(m)) {
-            return NaN;
-        }
-        if (!_isInteger(p) || p < 1) {
-            return NaN;
-        }
-        return (m % p + p) % p;
-    });
-
-    var modulo = op(function modulo(a, b) {
-        return a % b;
-    });
+    var map = _curry2(_dispatchable('map', _xmap));
 
     var pluck = _curry2(_pluck);
 
@@ -1862,9 +1924,34 @@
         return _filter(not(fn), list);
     });
 
+    var tCompose = function tCompose() {
+        var funcs = _map(_xfConvert, _slice(arguments));
+        return compose.apply(this, funcs);
+    };
+
+    var tPipe = function tPipe() {
+        var funcs = _map(_xfConvert, _slice(arguments));
+        return pipe.apply(this, funcs);
+    };
+
     var toPairs = _pairWith(keys);
 
     var toPairsIn = _pairWith(keysIn);
+
+    var where = function where(spec, testObj) {
+        var parsedSpec = groupBy(function (key) {
+            return typeof spec[key] === 'function' ? 'fn' : 'obj';
+        }, keys(spec));
+        switch (arguments.length) {
+        case 0:
+            throw _noArgsException();
+        case 1:
+            return function (testObj) {
+                return _satisfiesSpec(spec, parsedSpec, testObj);
+            };
+        }
+        return _satisfiesSpec(spec, parsedSpec, testObj);
+    };
 
     var _ap = function _ap(fns, vs) {
         return _hasMethod('ap', fns) ? fns.ap(vs) : _foldl(function (acc, fn) {
@@ -1890,10 +1977,6 @@
         return _foldl(consF, of([]), list);
     });
 
-    var construct = function construct(Fn) {
-        return constructN(Fn.length, Fn);
-    };
-
     var countBy = _curry2(function countBy(fn, list) {
         return _foldl(function (counts, obj) {
             counts[obj.key] = (counts[obj.key] || 0) + 1;
@@ -1914,6 +1997,14 @@
     var sortBy = _curry2(function sortBy(fn, list) {
         return _pluck('val', _keyValue(fn, list).sort(_compareKeys));
     });
+
+    var stepCompose = function stepCompose() {
+        return _transduceDispatch(tPipe.apply(this, arguments));
+    };
+
+    var stepPipe = function stepPipe() {
+        return _transduceDispatch(tCompose.apply(this, arguments));
+    };
 
     var commute = commuteMap(map(identity));
 
@@ -2089,6 +2180,8 @@
         sort: sort,
         sortBy: sortBy,
         split: split,
+        stepCompose: stepCompose,
+        stepPipe: stepPipe,
         strIndexOf: strIndexOf,
         strLastIndexOf: strLastIndexOf,
         substring: substring,
@@ -2096,6 +2189,8 @@
         substringTo: substringTo,
         subtract: subtract,
         sum: sum,
+        tCompose: tCompose,
+        tPipe: tPipe,
         tail: tail,
         take: take,
         takeWhile: takeWhile,
@@ -2105,6 +2200,7 @@
         toPairs: toPairs,
         toPairsIn: toPairsIn,
         toUpper: toUpper,
+        transduce: transduce,
         trim: trim,
         type: type,
         unapply: unapply,
