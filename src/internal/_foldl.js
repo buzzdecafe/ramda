@@ -1,17 +1,15 @@
 var _arrayReduce = require('./_arrayReduce');
 var _isIterable = require('./_isIterable');
-var _isTransformer = require('./_isTransformer');
 var _iterableReduce = require('./_iterableReduce');
-var _xwrap = require('./_xwrap');
 var isArrayLike = require('../isArrayLike');
 
 module.exports = function _foldl(fn, acc, list) {
-    var xf = (_isTransformer(fn)) ? fn : _xwrap(fn);
     if (isArrayLike(list)) {
-        return _arrayReduce(xf, acc, list);
+        return _arrayReduce(fn, acc, list);
     } else if (_isIterable(list)) {
-        return _iterableReduce(xf, acc, list);
+        return _iterableReduce(fn, acc, list);
     } else {
+        // TODO: better message here please
         throw new TypeError(typeof list + ' is not reducible');
     }
 };
