@@ -35,7 +35,7 @@ var _xmap = require('./internal/_xmap');
  *     //   'F': [{name: 'Eddy', score: 58}]
  *     // }
  */
-module.exports = _curry2(_dispatchable('groupBy', function groupBy(fn, list) {
+module.exports = _curry2(_dispatchable('groupBy', null, function groupBy(fn, list) {
     return _foldl(function(acc, elt) {
         var key = fn(elt);
         acc[key] = _append(elt, acc[key] || (acc[key] = []));

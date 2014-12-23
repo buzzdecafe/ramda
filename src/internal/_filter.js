@@ -1,7 +1,6 @@
-var _appendXf = require('./_appendXf');
+var _transduceDispatch = require('./_transduceDispatch');
 var _xfilter = require('./_xfilter');
-var foldl = require('../foldl');
 
 module.exports = function _filter(fn, list) {
-    return foldl(_xfilter(fn, _appendXf()), [], list);
+  return _transduceDispatch(_xfilter(fn), list);
 };

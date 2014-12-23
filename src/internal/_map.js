@@ -1,8 +1,7 @@
-var _appendXf = require('./_appendXf');
+var _transduceDispatch = require('./_transduceDispatch');
 var _xmap = require('./_xmap');
-var foldl = require('../foldl');
 
 module.exports = function _map(fn, list) {
-    return foldl(_xmap(fn, _appendXf()), [], list);
+    return _transduceDispatch(_xmap(fn), list);
 };
 
