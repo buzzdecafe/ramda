@@ -1,6 +1,6 @@
-var _checkForMethod = require('./internal/_checkForMethod');
 var _curry2 = require('./internal/_curry2');
-var _slice = require('./internal/_slice');
+var _dispatchable = require('./internal/_dispatchable');
+var _xdrop = require('./internal/_xdrop');
 
 
 /**
@@ -17,6 +17,4 @@ var _slice = require('./internal/_slice');
  *
  *     R.drop(3, [1,2,3,4,5,6,7]); //=> [4,5,6,7]
  */
-module.exports = _curry2(_checkForMethod('drop', function drop(n, list) {
-    return (n < list.length) ? _slice(list, n) : [];
-}));
+module.exports = _curry2(_dispatchable('drop', _xdrop));

@@ -1,7 +1,6 @@
-var _checkForMethod = require('./internal/_checkForMethod');
 var _curry2 = require('./internal/_curry2');
-var _slice = require('./internal/_slice');
-
+var _dispatchable = require('./internal/_dispatchable');
+var _xtakeWhile = require('./internal/_xtakeWhile');
 
 /**
  * Returns a new list containing the first `n` elements of a given list, passing each value
@@ -24,8 +23,4 @@ var _slice = require('./internal/_slice');
  *
  *      R.takeWhile(isNotFour, [1, 2, 3, 4]); //=> [1, 2, 3]
  */
-module.exports = _curry2(_checkForMethod('takeWhile', function(fn, list) {
-    var idx = -1, len = list.length;
-    while (++idx < len && fn(list[idx])) {}
-    return _slice(list, 0, idx);
-}));
+module.exports = _curry2(_dispatchable('takeWhile', _xtakeWhile));
