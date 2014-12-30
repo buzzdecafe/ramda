@@ -1,5 +1,7 @@
+var _appendXf = require('./internal/_appendXf');
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
+var _transduceDispatch = require('./internal/_transduceDispatch');
 var _xdropWhile = require('./internal/_xdropWhile');
 
 /**
@@ -22,4 +24,4 @@ var _xdropWhile = require('./internal/_xdropWhile');
  *
  *      R.dropWhile(lteTwo, [1, 2, 3, 4]); //=> [3, 4]
  */
-module.exports = _curry2(_dispatchable('dropWhile', _xdropWhile));
+module.exports = _curry2(_dispatchable('dropWhile', _transduceDispatch(_xdropWhile, _appendXf)));

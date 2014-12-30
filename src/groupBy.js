@@ -1,8 +1,6 @@
 var _append = require('./internal/_append');
 var _curry2 = require('./internal/_curry2');
-var _dispatchable = require('./internal/_dispatchable');
 var _foldl = require('./internal/_foldl');
-var _xmap = require('./internal/_xmap');
 
 /**
  * Splits a list into sub-lists stored in an object, based on the result of calling a String-returning function
@@ -35,10 +33,10 @@ var _xmap = require('./internal/_xmap');
  *     //   'F': [{name: 'Eddy', score: 58}]
  *     // }
  */
-module.exports = _curry2(_dispatchable('groupBy', null, function groupBy(fn, list) {
+module.exports = _curry2(function groupBy(fn, list) {
     return _foldl(function(acc, elt) {
         var key = fn(elt);
         acc[key] = _append(elt, acc[key] || (acc[key] = []));
         return acc;
     }, {}, list);
-}, _xmap));
+});

@@ -32,8 +32,7 @@ module.exports = (function() {
 
   function _appendXf(obj) {
       if (_isTransformer(obj)) {
-          var xf = obj[_symTransformer] || obj;
-          return xf;
+          return obj[_symTransformer] || obj;
       }
       if (isArrayLike(obj)) {
           return _appendXfArray;

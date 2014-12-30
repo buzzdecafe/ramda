@@ -1,5 +1,7 @@
+var _appendXf = require('./internal/_appendXf');
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
+var _transduceDispatch = require('./internal/_transduceDispatch');
 var _xtakeWhile = require('./internal/_xtakeWhile');
 
 /**
@@ -23,4 +25,4 @@ var _xtakeWhile = require('./internal/_xtakeWhile');
  *
  *      R.takeWhile(isNotFour, [1, 2, 3, 4]); //=> [1, 2, 3]
  */
-module.exports = _curry2(_dispatchable('takeWhile', _xtakeWhile));
+module.exports = _curry2(_dispatchable('takeWhile', _transduceDispatch(_xtakeWhile, _appendXf)));

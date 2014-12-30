@@ -1,26 +1,14 @@
-var _XF_FLAG_ = require('./_XF_FLAG_');
 var _isArray = require('./_isArray');
 var _slice = require('./_slice');
-var _transduceDispatch = require('./_transduceDispatch');
 
-module.exports = function _dispatchable(name, xf, f) {
+module.exports = function _dispatchable(name, fn) {
     return function() {
-        var length = arguments.length;
-        var obj = arguments[length - 1];
-        var args = _slice(arguments, 0, length - 1);
+        var length = arguments.length - 1;
+        var obj = arguments[length];
+        var args = _slice(arguments, 0, length);
 
-        if (obj === _XF_FLAG_) {
-            return xf.apply(null, args);
-        }
-
-        if (obj && !_isArray(obj) && typeof obj[name] === 'function') {
-            return obj[name].apply(obj, args);
-        }
-
-        if (typeof f === 'function') {
-            return f.apply(null, arguments);
-        }
-
-        return _transduceDispatch(xf.apply(null, args), obj);
+        return (obj && !_isArray(obj) && typeof obj[name] === 'function') ?
+            obj[name].apply(obj, args) :
+            fn.apply(obj, args);
     };
 };

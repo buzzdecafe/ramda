@@ -1,5 +1,7 @@
+var _appendXf = require('./internal/_appendXf');
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
+var _transduceDispatch = require('./internal/_transduceDispatch');
 var _xfilter = require('./internal/_xfilter');
 
 
@@ -25,4 +27,4 @@ var _xfilter = require('./internal/_xfilter');
  *      };
  *      R.filter(isEven, [1, 2, 3, 4]); //=> [2, 4]
  */
-module.exports = _curry2(_dispatchable('filter', _xfilter));
+module.exports = _curry2(_dispatchable('filter', _transduceDispatch(_xfilter, _appendXf)));

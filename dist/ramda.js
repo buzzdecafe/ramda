@@ -92,6 +92,16 @@
         };
     };
 
+    var _filter = function _filter(fn, list) {
+        var idx = -1, len = list.length, result = [];
+        while (++idx < len) {
+            if (fn(list[idx])) {
+                result[result.length] = list[idx];
+            }
+        }
+        return result;
+    };
+
     var _filterIndexed = function _filterIndexed(fn, list) {
         var idx = -1, len = list.length, result = [];
         while (++idx < len) {
@@ -108,6 +118,14 @@
             fn(list[idx]);
         }
         return list;
+    };
+
+    var _functionsWith = function _functionsWith(fn) {
+        return function (obj) {
+            return _filter(function (key) {
+                return typeof obj[key] === 'function';
+            }, fn(obj));
+        };
     };
 
     var _gt = function _gt(a, b) {
@@ -157,6 +175,14 @@
         return a < b;
     };
 
+    var _map = function _map(fn, list) {
+        var idx = -1, len = list.length, result = new Array(len);
+        while (++idx < len) {
+            result[idx] = fn(list[idx]);
+        }
+        return result;
+    };
+
     var _multiply = function _multiply(a, b) {
         return a * b;
     };
@@ -180,6 +206,17 @@
             } else {
                 return f.call(this, value);
             }
+        };
+    };
+
+    var _pairWith = function _pairWith(fn) {
+        return function (obj) {
+            return _map(function (key) {
+                return [
+                    key,
+                    obj[key]
+                ];
+            }, fn(obj));
         };
     };
 
@@ -354,6 +391,16 @@
                     return pairs[idx][1].apply(this, arguments);
                 }
             }
+        };
+    };
+
+    var converge = function (after) {
+        var fns = _slice(arguments, 1);
+        return function () {
+            var args = arguments;
+            return after.apply(this, _map(function (fn) {
+                return fn.apply(this, args);
+            }, fns));
         };
     };
 
@@ -551,6 +598,8 @@
     var reverse = function reverse(list) {
         return _slice(list).reverse();
     };
+
+    var toPairsIn = _pairWith(keysIn);
 
     var trim = function () {
         var ws = '\t\n\x0B\f\r \xA0\u1680\u180E\u2000\u2001\u2002\u2003' + '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028' + '\u2029\uFEFF';
@@ -773,6 +822,15 @@
         };
     };
 
+    var _dispatchable = function _dispatchable(name, fn) {
+        return function () {
+            var length = arguments.length - 1;
+            var obj = arguments[length];
+            var args = _slice(arguments, 0, length);
+            return obj && !_isArray(obj) && typeof obj[name] === 'function' ? obj[name].apply(obj, args) : fn.apply(obj, args);
+        };
+    };
+
     var _hasMethod = function _hasMethod(methodName, obj) {
         return obj != null && !_isArray(obj) && typeof obj[methodName] === 'function';
     };
@@ -799,6 +857,15 @@
             step = iter.next();
         }
         return xf.result(acc);
+    };
+
+    var _keyValue = function _keyValue(fn, list) {
+        return _map(function (item) {
+            return {
+                key: fn(item),
+                val: item
+            };
+        }, list);
     };
 
     var _makeFlat = function _makeFlat(recursive) {
@@ -835,6 +902,10 @@
         return copy;
     };
 
+    var _pluck = function _pluck(p, list) {
+        return _map(prop(p), list);
+    };
+
     var _xany = function () {
         function _xany(f, xf) {
             return new XAny(f, xf);
@@ -856,9 +927,6 @@
     }();
 
     var _xdrop = function () {
-        function _xdrop(n, xf) {
-            return new XDrop(n, xf);
-        }
         function XDrop(n, xf) {
             this.xf = xf;
             this.n = n;
@@ -876,7 +944,9 @@
             }
             return this.xf.step(result, input);
         };
-        return _curry2(_xdrop);
+        return _curry2(function _xdrop(n, xf) {
+            return new XDrop(n, xf);
+        });
     }();
 
     var _xdropWhile = function () {
@@ -1188,6 +1258,8 @@
         return list;
     });
 
+    var functionsIn = _functionsWith(keysIn);
+
     var get = prop;
 
     var has = _curry2(function (prop, obj) {
@@ -1386,6 +1458,8 @@
         return compose.apply(this, reverse(arguments));
     };
 
+    var pluck = _curry2(_pluck);
+
     var prepend = _curry2(_prepend);
 
     var propEq = _curry3(function propEq(name, val, obj) {
@@ -1417,6 +1491,10 @@
         return result;
     });
 
+    var reject = _curry2(function reject(fn, list) {
+        return _filter(not(fn), list);
+    });
+
     var rejectIndexed = _curry2(function rejectIndexed(fn, list) {
         return _filterIndexed(not(fn), list);
     });
@@ -1445,6 +1523,10 @@
         return clone(list).sort(comparator);
     });
 
+    var sortBy = _curry2(function sortBy(fn, list) {
+        return _pluck('val', _keyValue(fn, list).sort(_compareKeys));
+    });
+
     var split = invoker(1, 'split');
 
     var strIndexOf = _curry2(function strIndexOf(c, str) {
@@ -1460,6 +1542,16 @@
     var substringFrom = flip(substring)(void 0);
 
     var substringTo = substring(0);
+
+    var tCompose = function tCompose() {
+        var funcs = _map(_xfConvert, _slice(arguments));
+        return compose.apply(this, funcs);
+    };
+
+    var tPipe = function tPipe() {
+        var funcs = _map(_xfConvert, _slice(arguments));
+        return pipe.apply(this, funcs);
+    };
 
     var tail = _checkForMethod('tail', function (list) {
         return _slice(list, 1);
@@ -1481,6 +1573,8 @@
     });
 
     var toLower = invoker(0, 'toLowerCase');
+
+    var toPairs = _pairWith(keys);
 
     var toUpper = invoker(0, 'toUpperCase');
 
@@ -1599,15 +1693,99 @@
         }
     };
 
+    var _predicateWrap = function _predicateWrap(predPicker) {
+        return function (preds) {
+            var predIterator = function () {
+                var args = arguments;
+                return predPicker(function (predicate) {
+                    return predicate.apply(null, args);
+                }, preds);
+            };
+            return arguments.length > 1 ? predIterator.apply(null, _slice(arguments, 1)) : arity(max(_pluck('length', preds)), predIterator);
+        };
+    };
+
+    var _transduceDispatch = _curry2(function _transduceDispatch(xf, appender) {
+        return function _xfDispatch() {
+            var obj = this;
+            var transducer = xf.apply(null, arguments);
+            if (_isTransformer(obj)) {
+                return transducer(obj);
+            }
+            var stepper = appender(obj);
+            return _foldl(transducer(stepper), stepper.init(), obj);
+        };
+    });
+
+    var allPass = _predicateWrap(_all);
+
+    var assoc = _curry3(function (prop, val, obj) {
+        return _extend(fromPairs(_map(function (key) {
+            return [
+                key,
+                obj[key]
+            ];
+        }, keysIn(obj))), createMapEntry(prop, val));
+    });
+
+    var assocPath = function () {
+        var setParts = function (parts, val, obj) {
+            if (parts.length === 1) {
+                return assoc(parts[0], val, obj);
+            }
+            var current = obj[parts[0]];
+            return assoc(parts[0], setParts(_slice(parts, 1), val, is(Object, current) ? current : {}), obj);
+        };
+        return function (path, val, obj) {
+            var length = arguments.length;
+            if (length === 0) {
+                throw _noArgsException();
+            }
+            var parts = split('.', path);
+            var fn = _curry2(function (val, obj) {
+                return setParts(parts, val, obj);
+            });
+            switch (length) {
+            case 1:
+                return fn;
+            case 2:
+                return fn(val);
+            default:
+                return fn(val, obj);
+            }
+        };
+    }();
+
+    var chain = _curry2(_checkForMethod('chain', function chain(f, list) {
+        return unnest(_map(f, list));
+    }));
+
     var charAt = invoker(1, 'charAt');
 
     var charCodeAt = invoker(1, 'charCodeAt');
+
+    var countBy = _curry2(function countBy(fn, list) {
+        return _foldl(function (counts, obj) {
+            counts[obj.key] = (counts[obj.key] || 0) + 1;
+            return counts;
+        }, {}, _keyValue(fn, list));
+    });
 
     var curry = function curry(fn) {
         return curryN(fn.length, fn);
     };
 
     var foldl = _curry3(_foldl);
+
+    var functions = _functionsWith(keys);
+
+    var groupBy = _curry2(function groupBy(fn, list) {
+        return _foldl(function (acc, elt) {
+            var key = fn(elt);
+            acc[key] = _append(elt, acc[key] || (acc[key] = []));
+            return acc;
+        }, {}, list);
+    });
 
     var head = nth(0);
 
@@ -1616,6 +1794,10 @@
     var installTo = function (obj) {
         return _extend(obj, R);
     };
+
+    var intersection = _curry2(function intersection(list1, list2) {
+        return uniq(_filter(flip(_contains)(list1), list2));
+    });
 
     var intersectionWith = _curry3(function intersectionWith(pred, list1, list2) {
         var results = [], idx = -1;
@@ -1715,6 +1897,14 @@
         return times(always(value), n);
     });
 
+    var stepCompose = function stepCompose() {
+        return _transduceDispatch(tPipe.apply(this, arguments));
+    };
+
+    var stepPipe = function stepPipe() {
+        return _transduceDispatch(tCompose.apply(this, arguments));
+    };
+
     var subtract = op(function subtract(a, b) {
         return a - b;
     });
@@ -1743,8 +1933,29 @@
         }));
     };
 
+    var where = function where(spec, testObj) {
+        var parsedSpec = groupBy(function (key) {
+            return typeof spec[key] === 'function' ? 'fn' : 'obj';
+        }, keys(spec));
+        switch (arguments.length) {
+        case 0:
+            throw _noArgsException();
+        case 1:
+            return function (testObj) {
+                return _satisfiesSpec(spec, parsedSpec, testObj);
+            };
+        }
+        return _satisfiesSpec(spec, parsedSpec, testObj);
+    };
+
     var _any = function _any(fn, list) {
         return foldl(_xany(fn, _boolXf()), false, list);
+    };
+
+    var _ap = function _ap(fns, vs) {
+        return _hasMethod('ap', fns) ? fns.ap(vs) : _foldl(function (acc, fn) {
+            return _concat(acc, _map(fn, vs));
+        }, [], fns);
     };
 
     var _appendXf = function () {
@@ -1771,8 +1982,7 @@
         };
         function _appendXf(obj) {
             if (_isTransformer(obj)) {
-                var xf = obj[_symTransformer] || obj;
-                return xf;
+                return obj[_symTransformer] || obj;
             }
             if (isArrayLike(obj)) {
                 return _appendXfArray;
@@ -1788,12 +1998,18 @@
         return _appendXf;
     }();
 
-    var _transduceDispatch = _curry2(function _transduceDispatch(xf, obj) {
-        var appendXf = _appendXf(obj);
-        return transduce(xf, appendXf, appendXf.init(), obj);
-    });
-
     var any = _curry2(_any);
+
+    var anyPass = _predicateWrap(_any);
+
+    var ap = _curry2(_ap);
+
+    var commuteMap = _curry3(function commuteMap(fn, of, list) {
+        function consF(acc, ftor) {
+            return _ap(_map(append, fn(ftor)), acc);
+        }
+        return _foldl(consF, of([]), list);
+    });
 
     var concat = op(function (set1, set2) {
         if (_isArray(set2)) {
@@ -1823,11 +2039,17 @@
         return a / b;
     });
 
+    var drop = _curry2(_dispatchable('drop', _transduceDispatch(_xdrop, _appendXf)));
+
+    var dropWhile = _curry2(_dispatchable('dropWhile', _transduceDispatch(_xdropWhile, _appendXf)));
+
     var evolve = _curry2(function evolve(transformations, object) {
         return _extend(_extend({}, object), mapObjIndexed(function (fn, key) {
             return fn(object[key]);
         }, transformations));
     });
+
+    var filter = _curry2(_dispatchable('filter', _transduceDispatch(_xfilter, _appendXf)));
 
     var gt = op(_gt);
 
@@ -1840,6 +2062,8 @@
     var lte = op(function lte(a, b) {
         return a <= b;
     });
+
+    var map = _curry2(_dispatchable('map', _transduceDispatch(_xmap, _appendXf)));
 
     var mathMod = op(function mathMod(m, p) {
         if (!_isInteger(m)) {
@@ -1855,221 +2079,17 @@
         return a % b;
     });
 
-    var _dispatchable = function _dispatchable(name, xf, f) {
-        return function () {
-            var length = arguments.length;
-            var obj = arguments[length - 1];
-            var args = _slice(arguments, 0, length - 1);
-            if (obj === _XF_FLAG_) {
-                return xf.apply(null, args);
-            }
-            if (obj && !_isArray(obj) && typeof obj[name] === 'function') {
-                return obj[name].apply(obj, args);
-            }
-            if (typeof f === 'function') {
-                return f.apply(null, arguments);
-            }
-            return _transduceDispatch(xf.apply(null, args), obj);
-        };
-    };
+    var project = useWith(_map, pickAll, identity);
 
-    var _filter = function _filter(fn, list) {
-        return _transduceDispatch(_xfilter(fn), list);
-    };
+    var take = _curry2(_dispatchable('take', _transduceDispatch(_xtake, _appendXf)));
 
-    var _functionsWith = function _functionsWith(fn) {
-        return function (obj) {
-            return _filter(function (key) {
-                return typeof obj[key] === 'function';
-            }, fn(obj));
-        };
-    };
+    var takeWhile = _curry2(_dispatchable('takeWhile', _transduceDispatch(_xtakeWhile, _appendXf)));
 
-    var _map = function _map(fn, list) {
-        return _transduceDispatch(_xmap(fn), list);
-    };
-
-    var _pairWith = function _pairWith(fn) {
-        return function (obj) {
-            return _map(function (key) {
-                return [
-                    key,
-                    obj[key]
-                ];
-            }, fn(obj));
-        };
-    };
-
-    var _pluck = function _pluck(p, list) {
-        return _map(prop(p), list);
-    };
-
-    var _predicateWrap = function _predicateWrap(predPicker) {
-        return function (preds) {
-            var predIterator = function () {
-                var args = arguments;
-                return predPicker(function (predicate) {
-                    return predicate.apply(null, args);
-                }, preds);
-            };
-            return arguments.length > 1 ? predIterator.apply(null, _slice(arguments, 1)) : arity(max(_pluck('length', preds)), predIterator);
-        };
-    };
-
-    var allPass = _predicateWrap(_all);
-
-    var anyPass = _predicateWrap(_any);
-
-    var assoc = _curry3(function (prop, val, obj) {
-        return _extend(fromPairs(_map(function (key) {
-            return [
-                key,
-                obj[key]
-            ];
-        }, keysIn(obj))), createMapEntry(prop, val));
-    });
-
-    var assocPath = function () {
-        var setParts = function (parts, val, obj) {
-            if (parts.length === 1) {
-                return assoc(parts[0], val, obj);
-            }
-            var current = obj[parts[0]];
-            return assoc(parts[0], setParts(_slice(parts, 1), val, is(Object, current) ? current : {}), obj);
-        };
-        return function (path, val, obj) {
-            var length = arguments.length;
-            if (length === 0) {
-                throw _noArgsException();
-            }
-            var parts = split('.', path);
-            var fn = _curry2(function (val, obj) {
-                return setParts(parts, val, obj);
-            });
-            switch (length) {
-            case 1:
-                return fn;
-            case 2:
-                return fn(val);
-            default:
-                return fn(val, obj);
-            }
-        };
-    }();
-
-    var chain = _curry2(_checkForMethod('chain', function chain(f, list) {
-        return unnest(_map(f, list));
-    }));
+    var commute = commuteMap(map(identity));
 
     var construct = function construct(Fn) {
         return constructN(Fn.length, Fn);
     };
-
-    var converge = function (after) {
-        var fns = _slice(arguments, 1);
-        return function () {
-            var args = arguments;
-            return after.apply(this, _map(function (fn) {
-                return fn.apply(this, args);
-            }, fns));
-        };
-    };
-
-    var drop = _curry2(_dispatchable('drop', _xdrop));
-
-    var dropWhile = _curry2(_dispatchable('dropWhile', _xdropWhile));
-
-    var filter = _curry2(_dispatchable('filter', _xfilter));
-
-    var functions = _functionsWith(keys);
-
-    var functionsIn = _functionsWith(keysIn);
-
-    var groupBy = _curry2(_dispatchable('groupBy', null, function groupBy(fn, list) {
-        return _foldl(function (acc, elt) {
-            var key = fn(elt);
-            acc[key] = _append(elt, acc[key] || (acc[key] = []));
-            return acc;
-        }, {}, list);
-    }, _xmap));
-
-    var intersection = _curry2(function intersection(list1, list2) {
-        return uniq(_filter(flip(_contains)(list1), list2));
-    });
-
-    var map = _curry2(_dispatchable('map', _xmap));
-
-    var pluck = _curry2(_pluck);
-
-    var project = useWith(_map, pickAll, identity);
-
-    var reject = _curry2(function reject(fn, list) {
-        return _filter(not(fn), list);
-    });
-
-    var tCompose = function tCompose() {
-        var funcs = _map(_xfConvert, _slice(arguments));
-        return compose.apply(this, funcs);
-    };
-
-    var tPipe = function tPipe() {
-        var funcs = _map(_xfConvert, _slice(arguments));
-        return pipe.apply(this, funcs);
-    };
-
-    var take = _curry2(_dispatchable('take', _xtake));
-
-    var takeWhile = _curry2(_dispatchable('takeWhile', _xtakeWhile));
-
-    var toPairs = _pairWith(keys);
-
-    var toPairsIn = _pairWith(keysIn);
-
-    var where = function where(spec, testObj) {
-        var parsedSpec = groupBy(function (key) {
-            return typeof spec[key] === 'function' ? 'fn' : 'obj';
-        }, keys(spec));
-        switch (arguments.length) {
-        case 0:
-            throw _noArgsException();
-        case 1:
-            return function (testObj) {
-                return _satisfiesSpec(spec, parsedSpec, testObj);
-            };
-        }
-        return _satisfiesSpec(spec, parsedSpec, testObj);
-    };
-
-    var _ap = function _ap(fns, vs) {
-        return _hasMethod('ap', fns) ? fns.ap(vs) : _foldl(function (acc, fn) {
-            return _concat(acc, _map(fn, vs));
-        }, [], fns);
-    };
-
-    var _keyValue = function _keyValue(fn, list) {
-        return _map(function (item) {
-            return {
-                key: fn(item),
-                val: item
-            };
-        }, list);
-    };
-
-    var ap = _curry2(_ap);
-
-    var commuteMap = _curry3(function commuteMap(fn, of, list) {
-        function consF(acc, ftor) {
-            return _ap(_map(append, fn(ftor)), acc);
-        }
-        return _foldl(consF, of([]), list);
-    });
-
-    var countBy = _curry2(function countBy(fn, list) {
-        return _foldl(function (counts, obj) {
-            counts[obj.key] = (counts[obj.key] || 0) + 1;
-            return counts;
-        }, {}, _keyValue(fn, list));
-    });
 
     var liftN = _curry2(function liftN(arity, fn) {
         var lifted = curryN(arity, fn);
@@ -2080,20 +2100,6 @@
             return _foldl(ap, map(lifted, arguments[0]), _slice(arguments, 1));
         });
     });
-
-    var sortBy = _curry2(function sortBy(fn, list) {
-        return _pluck('val', _keyValue(fn, list).sort(_compareKeys));
-    });
-
-    var stepCompose = function stepCompose() {
-        return _transduceDispatch(tPipe.apply(this, arguments));
-    };
-
-    var stepPipe = function stepPipe() {
-        return _transduceDispatch(tCompose.apply(this, arguments));
-    };
-
-    var commute = commuteMap(map(identity));
 
     var lift = function lift(fn) {
         if (arguments.length === 0) {

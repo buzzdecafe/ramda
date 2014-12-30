@@ -1,5 +1,7 @@
+var _appendXf = require('./internal/_appendXf');
 var _curry2 = require('./internal/_curry2');
 var _dispatchable = require('./internal/_dispatchable');
+var _transduceDispatch = require('./internal/_transduceDispatch');
 var _xdrop = require('./internal/_xdrop');
 
 
@@ -17,4 +19,4 @@ var _xdrop = require('./internal/_xdrop');
  *
  *     R.drop(3, [1,2,3,4,5,6,7]); //=> [4,5,6,7]
  */
-module.exports = _curry2(_dispatchable('drop', _xdrop));
+module.exports = _curry2(_dispatchable('drop', _transduceDispatch(_xdrop, _appendXf)));

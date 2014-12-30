@@ -1,10 +1,6 @@
 var _curry2 = require('./_curry2');
 
 module.exports = (function() {
-    function _xdrop(n, xf) {
-        return new XDrop(n, xf);
-    }
-
     function XDrop(n, xf) {
         this.xf = xf;
         this.n = n;
@@ -26,5 +22,7 @@ module.exports = (function() {
       return this.xf.step(result, input);
     };
 
-    return _curry2(_xdrop);
+    return _curry2(function _xdrop(n, xf) {
+        return new XDrop(n, xf);
+    });
 })();
