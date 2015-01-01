@@ -16,6 +16,17 @@ describe('map', function() {
         assert.strictEqual(R.map(add1, obj), 101);
     });
 
+    it('dispatches to transformer objects', function() {
+        var obj = {
+            step: function(acc, x) { return acc.concat([x]); },
+            result: function(x) { return x; }
+        };
+        assert.deepEqual(R.map(add1, obj), {
+            f: add1,
+            xf: obj
+        });
+    });
+
     it('is automatically curried', function() {
         var inc = R.map(add1);
         assert.deepEqual(inc([1, 2, 3]), [2, 3, 4]);
