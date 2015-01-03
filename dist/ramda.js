@@ -932,7 +932,7 @@
             return this.xf.result(!!result);
         };
         XAll.prototype.step = function (result, input) {
-            return this.f(input) ? this.xf.step(result, input) : _reduced(this.xf.step(result, false));
+            return this.f(input) ? result : _reduced(this.xf.step(result, false));
         };
         return _curry2(_xall);
     }();
@@ -949,7 +949,7 @@
             return this.xf.init();
         };
         XAny.prototype.result = function (result) {
-            return this.xf.result(!!result);
+            return this.xf.result(result);
         };
         XAny.prototype.step = function (result, input) {
             return this.f(input) ? _reduced(this.xf.step(result, true)) : result;

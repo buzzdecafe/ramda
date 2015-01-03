@@ -20,7 +20,7 @@ module.exports = (function() {
     };
 
     XAll.prototype.step = function(result, input) {
-        return this.f(input) ? this.xf.step(result, input) : _reduced(this.xf.step(result, false));
+        return this.f(input) ? result : _reduced(this.xf.step(result, false));
     };
 
     return _curry2(_xall);

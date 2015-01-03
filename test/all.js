@@ -6,9 +6,11 @@ var R = require('..');
 describe('all', function() {
     var even = function(n) {return n % 2 === 0;};
     var T = function() {return true;};
+    var isFalse = function(x) { return x === false; };
 
     it('returns true if all elements satisfy the predicate', function() {
         assert.strictEqual(R.all(even, [2, 4, 6, 8, 10, 12]), true);
+        assert(R.all(isFalse, [false, false, false]));
     });
 
     it('returns false if any element fails to satisfy the predicate', function() {
@@ -33,6 +35,10 @@ describe('all', function() {
         function hasA(o) { return o.x.indexOf('a') > -1; }
         assert.strictEqual(R.all(len3, xs), false);
         assert.strictEqual(R.all(hasA, xs), true);
+    });
+
+    it('dispatches when given a transformer in list position', function() {
+
     });
 
     it('is automatically curried', function() {

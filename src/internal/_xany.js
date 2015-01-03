@@ -16,7 +16,7 @@ module.exports = (function() {
     };
 
     XAny.prototype.result = function(result) {
-        return this.xf.result(!!result);
+        return this.xf.result(result);
     };
 
     XAny.prototype.step = function(result, input) {
