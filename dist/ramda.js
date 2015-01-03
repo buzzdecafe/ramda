@@ -906,6 +906,37 @@
         return _map(prop(p), list);
     };
 
+    var _stepLast = function () {
+        function LastValue(initFn) {
+            this.init = initFn;
+        }
+        LastValue.prototype.step = nthArg(1);
+        LastValue.prototype.result = identity;
+        return function _stepLast(initFn) {
+            return always(new LastValue(initFn));
+        };
+    }();
+
+    var _xall = function () {
+        function _xall(f, xf) {
+            return new XAll(f, xf);
+        }
+        function XAll(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XAll.prototype.init = function () {
+            return this.xf.init();
+        };
+        XAll.prototype.result = function (result) {
+            return this.xf.result(!!result);
+        };
+        XAll.prototype.step = function (result, input) {
+            return this.f(input) ? this.xf.step(result, input) : _reduced(this.xf.step(result, false));
+        };
+        return _curry2(_xall);
+    }();
+
     var _xany = function () {
         function _xany(f, xf) {
             return new XAny(f, xf);
@@ -918,10 +949,10 @@
             return this.xf.init();
         };
         XAny.prototype.result = function (result) {
-            return this.xf.result(result);
+            return this.xf.result(!!result);
         };
         XAny.prototype.step = function (result, input) {
-            return this.f(input) ? _reduced(true) : false;
+            return this.f(input) ? _reduced(this.xf.step(result, true)) : result;
         };
         return _curry2(_xany);
     }();
@@ -1084,8 +1115,6 @@
     }();
 
     var add = _curry2(_add);
-
-    var all = _curry2(_all);
 
     var and = _curry2(function and(f, g) {
         return function _and() {
@@ -1717,7 +1746,11 @@
         };
     });
 
+    var all = _curry2(_dispatchable('all', _transduceDispatch(_xall, _stepLast(T))));
+
     var allPass = _predicateWrap(_all);
+
+    var any = _curry2(_dispatchable('any', _transduceDispatch(_xany, _stepLast(F))));
 
     var assoc = _curry3(function (prop, val, obj) {
         return _extend(fromPairs(_map(function (key) {
@@ -1912,7 +1945,7 @@
     var sum = foldl(_add, 0);
 
     var transduce = _curry4(function (xf, fn, acc, ls) {
-        return foldl(xf(fn), acc, ls);
+        return _foldl(xf(fn), acc, ls);
     });
 
     var union = _curry2(compose(uniq, _concat));
@@ -1997,8 +2030,6 @@
         }
         return _appendXf;
     }();
-
-    var any = _curry2(_any);
 
     var anyPass = _predicateWrap(_any);
 

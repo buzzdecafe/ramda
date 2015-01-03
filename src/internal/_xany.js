@@ -16,11 +16,11 @@ module.exports = (function() {
     };
 
     XAny.prototype.result = function(result) {
-        return this.xf.result(result);
+        return this.xf.result(!!result);
     };
 
     XAny.prototype.step = function(result, input) {
-        return this.f(input) ? _reduced(true) : false;
+        return this.f(input) ? _reduced(this.xf.step(result, true)) : result;
     };
 
     return _curry2(_xany);

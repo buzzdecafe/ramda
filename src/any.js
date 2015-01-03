@@ -1,5 +1,9 @@
-var _any = require('./internal/_any');
+var F = require('F');
 var _curry2 = require('./internal/_curry2');
+var _dispatchable = require('./internal/_dispatchable');
+var _stepLast = require('./internal/_stepLast');
+var _transduceDispatch = require('./internal/_transduceDispatch');
+var _xany = require('./internal/_xany');
 
 
 /**
@@ -23,4 +27,4 @@ var _curry2 = require('./internal/_curry2');
  *      R.any(lessThan0)(xs); //=> false
  *      R.any(lessThan2)(xs); //=> true
  */
-module.exports = _curry2(_any);
+module.exports = _curry2(_dispatchable('any', _transduceDispatch(_xany, _stepLast(F))));
