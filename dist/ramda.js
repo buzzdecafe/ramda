@@ -1912,7 +1912,7 @@
     var sum = foldl(_add, 0);
 
     var transduce = _curry4(function (xf, fn, acc, ls) {
-        return foldl(xf(fn), acc, ls);
+        return _foldl(xf(fn), acc, ls);
     });
 
     var union = _curry2(compose(uniq, _concat));
@@ -2057,6 +2057,18 @@
         return a >= b;
     });
 
+    var into = _curry3(function into(to, xf, ls) {
+        var acc, fn;
+        if (_isTransformer(to)) {
+            fn = to;
+            acc = to.init();
+        } else {
+            fn = _appendXf(to);
+            acc = to;
+        }
+        return _foldl(xf(fn), acc, ls);
+    });
+
     var lt = op(_lt);
 
     var lte = op(function lte(a, b) {
@@ -2194,6 +2206,7 @@
         installTo: installTo,
         intersection: intersection,
         intersectionWith: intersectionWith,
+        into: into,
         invert: invert,
         invertObj: invertObj,
         invoker: invoker,

@@ -7,6 +7,7 @@ describe('map', function() {
     var times2 = function(x) {return x * 2;};
     var add1 = function(x) {return x + 1;};
     var dec = function(x) { return x - 1; };
+    var intoArray = R.into([]);
     var listxf = {
         init: function() { return []; },
         step: function(acc, x) { return acc.concat([x]); },
@@ -15,6 +16,10 @@ describe('map', function() {
 
     it('maps simple functions over arrays', function() {
         assert.deepEqual(R.map(times2, [1, 2, 3, 4]), [2, 4, 6, 8]);
+    });
+
+    it('maps simple functions into arrays', function() {
+        assert.deepEqual(intoArray(R.map(times2), [1, 2, 3, 4]), [2, 4, 6, 8]);
     });
 
     it('dispatches to objects that implement `map`', function() {
