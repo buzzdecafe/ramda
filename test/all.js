@@ -7,6 +7,7 @@ describe('all', function() {
     var even = function(n) {return n % 2 === 0;};
     var T = function() {return true;};
     var isFalse = function(x) { return x === false; };
+    var intoArray = R.into([]);
 
     it('returns true if all elements satisfy the predicate', function() {
         assert.strictEqual(R.all(even, [2, 4, 6, 8, 10, 12]), true);
@@ -19,6 +20,19 @@ describe('all', function() {
 
     it('returns true for an empty list', function() {
         assert.strictEqual(R.all(T, []), true);
+    });
+
+    it('returns true into array if all elements satisfy the predicate', function() {
+        assert.deepEqual(intoArray(R.all(even), [2, 4, 6, 8, 10, 12]), [true]);
+        assert.deepEqual(intoArray(R.all(isFalse), [false, false, false]), [true]);
+    });
+
+    it('returns false into array if any element fails to satisfy the predicate', function() {
+        assert.deepEqual(intoArray(R.all(even), [2, 4, 6, 8, 9, 10]), [false]);
+    });
+
+    it('returns true into array for an empty list', function() {
+        assert.deepEqual(intoArray(R.all(T), []), [true]);
     });
 
     it('short-circuits on first false value', function() {

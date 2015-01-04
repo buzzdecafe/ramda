@@ -1,4 +1,8 @@
 var _curry2 = require('./internal/_curry2');
+var _dispatchable = require('./internal/_dispatchable');
+var _stepLast = require('./_stepLast');
+var _transduceDispatch = require('./internal/_transduceDispatch');
+var _xfindIndex = require('./internal/_xfindIndex');
 
 
 /**
@@ -19,13 +23,4 @@ var _curry2 = require('./internal/_curry2');
  *      R.findIndex(R.propEq('a', 2))(xs); //=> 1
  *      R.findIndex(R.propEq('a', 4))(xs); //=> -1
  */
-module.exports = _curry2(function findIndex(fn, list) {
-    var idx = -1;
-    var len = list.length;
-    while (++idx < len) {
-        if (fn(list[idx])) {
-            return idx;
-        }
-    }
-    return -1;
-});
+module.exports = _curry2(_dispatchable('findIndex', _transduceDispatch(_xfindIndex, _stepLast)));

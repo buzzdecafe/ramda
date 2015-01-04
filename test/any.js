@@ -6,6 +6,7 @@ var R = require('..');
 describe('any', function() {
     var odd = function(n) {return n % 2 === 1;};
     var T = function() {return true;};
+    var intoArray = R.into([]);
 
     it('returns true if any element satisfies the predicate', function() {
         assert.strictEqual(R.any(odd, [2, 4, 6, 8, 10, 11, 12]), true);
@@ -13,6 +14,14 @@ describe('any', function() {
 
     it('returns false if all elements fails to satisfy the predicate', function() {
         assert.strictEqual(R.any(odd, [2, 4, 6, 8, 10, 12]), false);
+    });
+
+    it('returns true into array if any element satisfies the predicate', function() {
+        assert.deepEqual(intoArray(R.any(odd), [2, 4, 6, 8, 10, 11, 12]), [true]);
+    });
+
+    it('returns false if all elements fails to satisfy the predicate', function() {
+        assert.deepEqual(intoArray(R.any(odd), [2, 4, 6, 8, 10, 12]), [false]);
     });
 
     it('works with more complex objects', function() {
@@ -32,6 +41,10 @@ describe('any', function() {
 
     it('returns false for an empty list', function() {
         assert.strictEqual(R.any(T, []), false);
+    });
+
+    it('returns false into array for an empty list', function() {
+        assert.deepEqual(intoArray(R.any(T), []), [false]);
     });
 
     it('short-circuits on first true value', function() {

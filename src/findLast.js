@@ -1,4 +1,8 @@
 var _curry2 = require('./internal/_curry2');
+var _dispatchable = require('./internal/_dispatchable');
+var _stepLast = require('./_stepLast');
+var _transduceDispatch = require('./internal/_transduceDispatch');
+var _xfindLast = require('./internal/_xfindLast');
 
 
 /**
@@ -19,11 +23,4 @@ var _curry2 = require('./internal/_curry2');
  *      R.findLast(R.propEq('a', 1))(xs); //=> {a: 1, b: 1}
  *      R.findLast(R.propEq('a', 4))(xs); //=> undefined
  */
-module.exports = _curry2(function findLast(fn, list) {
-    var idx = list.length;
-    while (idx--) {
-        if (fn(list[idx])) {
-            return list[idx];
-        }
-    }
-});
+module.exports = _curry2(_dispatchable('findLast', _transduceDispatch(_xfindLast, _stepLast)));

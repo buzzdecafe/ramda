@@ -7,7 +7,7 @@ module.exports = function _iterableReduce(xf, acc, iter) {
     var step = iter.next();
     while (!step.done) {
         acc = xf.step(acc, step.value);
-        if (acc.__transducers_reduced__) {
+        if (acc && acc.__transducers_reduced__) {
             acc = acc.value;
             break;
         }

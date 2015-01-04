@@ -29,7 +29,7 @@
         var idx = -1, len = ls.length;
         while (++idx < len) {
             acc = xf.step(acc, ls[idx]);
-            if (acc.__transducers_reduced__) {
+            if (acc && acc.__transducers_reduced__) {
                 acc = acc.value;
                 break;
             }
@@ -850,7 +850,7 @@
         var step = iter.next();
         while (!step.done) {
             acc = xf.step(acc, step.value);
-            if (acc.__transducers_reduced__) {
+            if (acc && acc.__transducers_reduced__) {
                 acc = acc.value;
                 break;
             }
@@ -906,16 +906,11 @@
         return _map(prop(p), list);
     };
 
-    var _stepLast = function () {
-        function LastValue(initFn) {
-            this.init = initFn;
-        }
-        LastValue.prototype.step = nthArg(1);
-        LastValue.prototype.result = identity;
-        return function _stepLast(initFn) {
-            return always(new LastValue(initFn));
-        };
-    }();
+    var _stepLast = always({
+        init: always(),
+        step: nthArg(1),
+        result: identity
+    });
 
     var _xall = function () {
         function _xall(f, xf) {
@@ -924,15 +919,23 @@
         function XAll(f, xf) {
             this.xf = xf;
             this.f = f;
+            this.all = true;
         }
         XAll.prototype.init = function () {
             return this.xf.init();
         };
         XAll.prototype.result = function (result) {
-            return this.xf.result(!!result);
+            if (this.all) {
+                result = this.xf.step(result, true);
+            }
+            return this.xf.result(result);
         };
         XAll.prototype.step = function (result, input) {
-            return this.f(input) ? result : _reduced(this.xf.step(result, false));
+            if (!this.f(input)) {
+                this.all = false;
+                result = _reduced(this.xf.step(result, false));
+            }
+            return result;
         };
         return _curry2(_xall);
     }();
@@ -944,15 +947,23 @@
         function XAny(f, xf) {
             this.xf = xf;
             this.f = f;
+            this.any = false;
         }
         XAny.prototype.init = function () {
             return this.xf.init();
         };
         XAny.prototype.result = function (result) {
+            if (!this.any) {
+                result = this.xf.step(result, false);
+            }
             return this.xf.result(result);
         };
         XAny.prototype.step = function (result, input) {
-            return this.f(input) ? _reduced(this.xf.step(result, true)) : result;
+            if (this.f(input)) {
+                this.any = true;
+                result = _reduced(this.xf.step(result, true));
+            }
+            return result;
         };
         return _curry2(_xany);
     }();
@@ -1024,6 +1035,113 @@
             return this.f(input) ? this.xf.step(result, input) : result;
         };
         return _curry2(_xfilter);
+    }();
+
+    var _xfind = function () {
+        function _xfind(f, xf) {
+            return new XFind(f, xf);
+        }
+        function XFind(f, xf) {
+            this.xf = xf;
+            this.f = f;
+            this.found = false;
+        }
+        XFind.prototype.init = function () {
+            return this.xf.init();
+        };
+        XFind.prototype.result = function (result) {
+            if (!this.found) {
+                result = this.xf.step(result, void 0);
+            }
+            return this.xf.result(result);
+        };
+        XFind.prototype.step = function (result, input) {
+            if (this.f(input)) {
+                this.found = true;
+                result = _reduced(this.xf.step(result, input));
+            }
+            return result;
+        };
+        return _curry2(_xfind);
+    }();
+
+    var _xfindIndex = function () {
+        function _xfindIndex(f, xf) {
+            return new XFindIndex(f, xf);
+        }
+        function XFindIndex(f, xf) {
+            this.xf = xf;
+            this.f = f;
+            this.idx = -1;
+            this.found = false;
+        }
+        XFindIndex.prototype.init = function () {
+            return this.xf.init();
+        };
+        XFindIndex.prototype.result = function (result) {
+            if (!this.found) {
+                result = this.xf.step(result, -1);
+            }
+            return this.xf.result(result);
+        };
+        XFindIndex.prototype.step = function (result, input) {
+            this.idx++;
+            if (this.f(input)) {
+                this.found = true;
+                result = _reduced(this.xf.step(result, this.idx));
+            }
+            return result;
+        };
+        return _curry2(_xfindIndex);
+    }();
+
+    var _xfindLast = function () {
+        function _xfindLast(f, xf) {
+            return new XFindLast(f, xf);
+        }
+        function XFindLast(f, xf) {
+            this.xf = xf;
+            this.f = f;
+        }
+        XFindLast.prototype.init = function () {
+            return this.xf.init();
+        };
+        XFindLast.prototype.result = function (result) {
+            return this.xf.result(this.xf.step(result, this.last));
+        };
+        XFindLast.prototype.step = function (result, input) {
+            if (this.f(input)) {
+                this.last = input;
+            }
+            return result;
+        };
+        return _curry2(_xfindLast);
+    }();
+
+    var _xfindLastIndex = function () {
+        function _xfindLastIndex(f, xf) {
+            return new XFindLastIndex(f, xf);
+        }
+        function XFindLastIndex(f, xf) {
+            this.xf = xf;
+            this.f = f;
+            this.idx = -1;
+            this.lastIdx = -1;
+        }
+        XFindLastIndex.prototype.init = function () {
+            return this.xf.init();
+        };
+        XFindLastIndex.prototype.result = function (result) {
+            return this.xf.result(this.xf.step(result, this.lastIdx));
+        };
+        XFindLastIndex.prototype.step = function (result, input) {
+            this.idx++;
+            if (this.f(input)) {
+                this.lastIdx = this.idx;
+            }
+            return result;
+        };
+        return _curry2(_xfindLastIndex);
     }();
 
     var _xmap = function () {
@@ -1210,46 +1328,6 @@
     });
 
     var filterIndexed = _curry2(_filterIndexed);
-
-    var find = _curry2(function find(fn, list) {
-        var idx = -1;
-        var len = list.length;
-        while (++idx < len) {
-            if (fn(list[idx])) {
-                return list[idx];
-            }
-        }
-    });
-
-    var findIndex = _curry2(function findIndex(fn, list) {
-        var idx = -1;
-        var len = list.length;
-        while (++idx < len) {
-            if (fn(list[idx])) {
-                return idx;
-            }
-        }
-        return -1;
-    });
-
-    var findLast = _curry2(function findLast(fn, list) {
-        var idx = list.length;
-        while (idx--) {
-            if (fn(list[idx])) {
-                return list[idx];
-            }
-        }
-    });
-
-    var findLastIndex = _curry2(function findLastIndex(fn, list) {
-        var idx = list.length;
-        while (idx--) {
-            if (fn(list[idx])) {
-                return idx;
-            }
-        }
-        return -1;
-    });
 
     var flatten = _makeFlat(true);
 
@@ -1746,11 +1824,11 @@
         };
     });
 
-    var all = _curry2(_dispatchable('all', _transduceDispatch(_xall, _stepLast(T))));
+    var all = _curry2(_dispatchable('all', _transduceDispatch(_xall, _stepLast)));
 
     var allPass = _predicateWrap(_all);
 
-    var any = _curry2(_dispatchable('any', _transduceDispatch(_xany, _stepLast(F))));
+    var any = _curry2(_dispatchable('any', _transduceDispatch(_xany, _stepLast)));
 
     var assoc = _curry3(function (prop, val, obj) {
         return _extend(fromPairs(_map(function (key) {
@@ -1807,6 +1885,14 @@
     var curry = function curry(fn) {
         return curryN(fn.length, fn);
     };
+
+    var find = _curry2(_dispatchable('find', _transduceDispatch(_xfind, _stepLast)));
+
+    var findIndex = _curry2(_dispatchable('findIndex', _transduceDispatch(_xfindIndex, _stepLast)));
+
+    var findLast = _curry2(_dispatchable('findLast', _transduceDispatch(_xfindLast, _stepLast)));
+
+    var findLastIndex = _curry2(_dispatchable('findLastIndex', _transduceDispatch(_xfindLastIndex, _stepLast)));
 
     var foldl = _curry3(_foldl);
 

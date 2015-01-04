@@ -1,4 +1,8 @@
 var _curry2 = require('./internal/_curry2');
+var _dispatchable = require('./internal/_dispatchable');
+var _stepLast = require('./_stepLast');
+var _transduceDispatch = require('./internal/_transduceDispatch');
+var _xfind = require('./internal/_xfind');
 
 
 /**
@@ -19,12 +23,4 @@ var _curry2 = require('./internal/_curry2');
  *      R.find(R.propEq('a', 2))(xs); //=> {a: 2}
  *      R.find(R.propEq('a', 4))(xs); //=> undefined
  */
-module.exports = _curry2(function find(fn, list) {
-    var idx = -1;
-    var len = list.length;
-    while (++idx < len) {
-        if (fn(list[idx])) {
-            return list[idx];
-        }
-    }
-});
+module.exports = _curry2(_dispatchable('find', _transduceDispatch(_xfind, _stepLast)));

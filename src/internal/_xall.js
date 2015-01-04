@@ -9,6 +9,7 @@ module.exports = (function() {
     function XAll(f, xf) {
         this.xf = xf;
         this.f = f;
+        this.all = true;
     }
 
     XAll.prototype.init = function() {
@@ -16,11 +17,18 @@ module.exports = (function() {
     };
 
     XAll.prototype.result = function(result) {
-        return this.xf.result(!!result);
+        if (this.all) {
+          result = this.xf.step(result, true);
+        }
+        return this.xf.result(result);
     };
 
     XAll.prototype.step = function(result, input) {
-        return this.f(input) ? result : _reduced(this.xf.step(result, false));
+        if (!this.f(input)) {
+            this.all = false;
+            result = _reduced(this.xf.step(result, false));
+        }
+        return result;
     };
 
     return _curry2(_xall);
